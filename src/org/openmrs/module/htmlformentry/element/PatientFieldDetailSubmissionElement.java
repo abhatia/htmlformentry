@@ -17,6 +17,7 @@ import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.Person;
+import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
 import org.openmrs.api.context.Context;
 import org.openmrs.messagesource.MessageSourceService;
@@ -27,6 +28,7 @@ import org.openmrs.module.htmlformentry.HtmlFormEntryUtil;
 import org.openmrs.module.htmlformentry.ValidationException;
 import org.openmrs.module.htmlformentry.FormEntryContext.Mode;
 import org.openmrs.module.htmlformentry.action.FormSubmissionControllerAction;
+import org.openmrs.module.htmlformentry.widget.AddressWidget;
 import org.openmrs.module.htmlformentry.widget.DateWidget;
 import org.openmrs.module.htmlformentry.widget.DropdownWidget;
 import org.openmrs.module.htmlformentry.widget.ErrorWidget;
@@ -70,6 +72,8 @@ public class PatientFieldDetailSubmissionElement implements HtmlGeneratorElement
 
 	public static final String FIELD_IDENTIFIER_LOCATION = "identifierLocation";
 
+	public static final String FIELD_ADDRESS = "address";
+
 	private Widget givenNameWidget;
 	private ErrorWidget givenNameErrorWidget;
 	private Widget middleNameWidget;
@@ -86,6 +90,7 @@ public class PatientFieldDetailSubmissionElement implements HtmlGeneratorElement
 	private ErrorWidget identifierTypeValueErrorWidget;
 	private Widget identifierLocationWidget;
 	private ErrorWidget identifierLocationErrorWidget;
+	private AddressWidget addressWidget;
 
 	public PatientFieldDetailSubmissionElement(FormEntryContext context, Map<String, String> attributes) {
 		createElement(context, attributes);
@@ -183,6 +188,11 @@ public class PatientFieldDetailSubmissionElement implements HtmlGeneratorElement
 			createWidgets(context, identifierLocationWidget, identifierLocationErrorWidget, existingPatient != null
 					&& existingPatient.getPatientIdentifier() != null ? existingPatient.getPatientIdentifier().getLocation() : null);
 		}
+
+		else if (FIELD_ADDRESS.equalsIgnoreCase(field)) {
+			addressWidget = new AddressWidget();
+			createWidgets(context, addressWidget, null, existingPatient != null ? existingPatient.getPersonAddress() : null);
+		}
 	}
 
 	private void createWidgets(FormEntryContext context, Widget fieldWidget, ErrorWidget errorWidget, Object initialValue) {
@@ -266,6 +276,10 @@ public class PatientFieldDetailSubmissionElement implements HtmlGeneratorElement
 			sb.append(identifierLocationWidget.generateHtml(context));
 			if (context.getMode() != Mode.VIEW)
 				sb.append(identifierLocationErrorWidget.generateHtml(context));
+		}
+
+		if (addressWidget != null) {
+			sb.append(addressWidget.generateHtml(context));
 		}
 
 		return sb.toString();
@@ -372,6 +386,12 @@ public class PatientFieldDetailSubmissionElement implements HtmlGeneratorElement
 			patientIdentifier.setLocation(location);
 			patientIdentifier.setPreferred(true);
 
+		}
+
+		if (addressWidget != null) {
+			PersonAddress personAddress = (PersonAddress) addressWidget.getValue(session.getContext(), request);
+			personAddress.setPreferred(true);
+			patient.addAddress(personAddress);
 		}
 		
 		Integer identifierType = null;
