@@ -4,7 +4,7 @@
 	<!-- Base Module Properties -->
 	<id>htmlformentry</id>
 	<name>HTML Form Entry</name>
-	<version>1.6.7</version>
+	<version>1.6.8</version>
 	<package>org.openmrs.module.htmlformentry</package>
 	<author>Darius Jazayeri</author>
 	<description>
@@ -27,6 +27,10 @@
 		<point>org.openmrs.module.web.extension.FormEntryHandler</point>
 		<class>org.openmrs.module.htmlformentry.extension.html.FormEntryHandlerExtension</class>
 	</extension>
+	<extension>
+        <point>org.openmrs.createPatientPortlet.portletExtension</point>
+        <class>org.openmrs.module.htmlformentry.extension.html.CreatePatientPortletExtension</class>
+    </extension>	
 	
 	<!-- AOP
 	<advice>

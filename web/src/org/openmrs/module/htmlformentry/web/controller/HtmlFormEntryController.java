@@ -18,6 +18,7 @@ import org.openmrs.module.htmlformentry.FormEntrySession;
 import org.openmrs.module.htmlformentry.FormSubmissionError;
 import org.openmrs.module.htmlformentry.HtmlForm;
 import org.openmrs.module.htmlformentry.HtmlFormEntryUtil;
+import org.openmrs.module.htmlformentry.ValidationException;
 import org.openmrs.module.htmlformentry.FormEntryContext.Mode;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
@@ -158,11 +159,17 @@ public class HtmlFormEntryController extends SimpleFormController {
             HttpServletResponse response, Object commandObject, BindException errors)
             throws Exception {
         FormEntrySession session = (FormEntrySession) commandObject;
-        try {
-            session.prepareForSubmit();
+        session.prepareForSubmit();
+        if (session.getContext().getMode() == Mode.ENTER && (session.getSubmissionActions().getEncountersToCreate() == null || session.getSubmissionActions().getEncountersToCreate().size() == 0))
+            throw new IllegalArgumentException("This form is not going to create an encounter"); 
+        
+        return handleSubmit(request, response, session, errors);
+    }
+    
+    protected ModelAndView handleSubmit(HttpServletRequest request, HttpServletResponse response, FormEntrySession session, BindException errors) throws Exception{
+    	try {
+            
             session.getSubmissionController().handleFormSubmission(session, request);
-            if (session.getContext().getMode() == Mode.ENTER && (session.getSubmissionActions().getEncountersToCreate() == null || session.getSubmissionActions().getEncountersToCreate().size() == 0))
-                throw new IllegalArgumentException("This form is not going to create an encounter"); 
             session.applyActions();
             String successView = session.getReturnUrlWithParameters();
             if (successView == null)
@@ -172,6 +179,10 @@ public class HtmlFormEntryController extends SimpleFormController {
             } else {
             	return new ModelAndView(new RedirectView(successView));
             }
+        } catch (ValidationException ex) {
+            log.error("Invalid input:", ex);
+            errors.reject(ex.getMessage());
+            return showForm(request, response, errors);
         } catch (BadFormDesignException ex) {
             log.error("Bad Form Design:", ex);
             errors.reject(ex.getMessage());

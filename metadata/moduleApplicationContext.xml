@@ -25,6 +25,8 @@
 				<prop key="module/htmlformentry/htmlForm.form">htmlFormController</prop>
 				<prop key="module/htmlformentry/htmlFormEntry.form">htmlFormEntryController</prop>
 				<prop key="module/htmlformentry/deleteEncounter.form">deleteEncounterController</prop>
+				<prop key="/module/htmlformentry/patientHtmlFormEntry.form">patientHtmlFormEntryController</prop>
+				<prop key="**/createPatientHtmlFormSelect.portlet">createPatientPortletController</prop>
 				<prop key="**/patientHtmlForms.portlet">patientHtmlFormsPortletController</prop>
 	    	</props>
 		</property>
@@ -82,6 +84,10 @@
 								        <key><value>submit</value></key>
 								        <bean class="org.openmrs.module.htmlformentry.handler.SubmitButtonHandler"/>
 							      	</entry>
+							      	<entry>
+								        <key><value>patientField</value></key>
+								        <bean class="org.openmrs.module.htmlformentry.handler.PatientFieldTagHandler"/>
+							      	</entry>							      	
 							    </map>  
 							</property>
 						</bean>
@@ -138,11 +144,22 @@
 		<property name="successView"><value>../../patientDashboard.form</value></property>
     </bean>
     
+    <bean id="patientHtmlFormEntryController" class="org.openmrs.module.htmlformentry.web.controller.PatientHtmlFormEntryController">
+        <property name="sessionForm"><value>false</value></property>
+        <property name="commandName"><value>command</value></property>
+        <property name="formView"><value>/module/htmlformentry/patientHtmlFormEntry</value></property>
+        <property name="closeDialogView"><value>/module/htmlformentry/closeDialog</value></property>
+        <property name="successView"><value>../../patientDashboard.form</value></property>
+    </bean>
+        
     <bean id="deleteEncounterController" class="org.openmrs.module.htmlformentry.web.controller.DeleteEncounterController"/>
     
     <bean id="htmlFormValidator" class="org.openmrs.module.htmlformentry.HtmlFormValidator"/>
     
+    <bean id="createPatientPortletController" class="org.openmrs.module.htmlformentry.web.controller.CreatePatientPortletController" />
+
     <bean id="patientHtmlFormsPortletController" class="org.openmrs.module.htmlformentry.web.controller.PatientHtmlFormEntryPortletController" />
+    
     <!-- /Controllers -->
     
 </beans>
