@@ -3,11 +3,13 @@ package org.openmrs.module.htmlformentry.web.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.openmrs.Encounter;
 import org.openmrs.Form;
 import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.htmlformentry.FormEntrySession;
 import org.openmrs.module.htmlformentry.HtmlForm;
+import org.openmrs.module.htmlformentry.HtmlFormEntryConstants;
 import org.openmrs.module.htmlformentry.HtmlFormEntryUtil;
 import org.openmrs.module.htmlformentry.FormEntryContext.Mode;
 import org.springframework.util.StringUtils;
@@ -21,6 +23,8 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public class PatientHtmlFormEntryController extends HtmlFormEntryController {
 
+	private boolean isEncounterEnabled = false;
+
 	@Override
 	protected FormEntrySession formBackingObject(HttpServletRequest request) throws Exception {
 
@@ -31,7 +35,8 @@ public class PatientHtmlFormEntryController extends HtmlFormEntryController {
 		if ("Enter".equalsIgnoreCase(request.getParameter("mode"))) {
 			mode = Mode.ENTER;
 			patient = new Patient();
-		} else if ("Edit".equalsIgnoreCase(request.getParameter("mode"))) {
+		}
+		else if ("Edit".equalsIgnoreCase(request.getParameter("mode"))) {
 			mode = Mode.EDIT;
 		}
 
@@ -58,16 +63,19 @@ public class PatientHtmlFormEntryController extends HtmlFormEntryController {
 			if (StringUtils.hasText(patientIDParam)) {
 				try {
 					patient = Context.getPatientService().getPatient(new Integer(patientIDParam));
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 				}
 				if (patient == null)
 					throw new IllegalArgumentException("No patient with id " + patientIDParam
 							+ "  or not able to reterive the given patient details.");
-			} else
+			}
+			else
 				throw new IllegalArgumentException("patientId param missing");
 		}
 
 		FormEntrySession session;
+		isEncounterEnabled = hasEncouterTag(htmlForm.getXmlData());
 		session = new FormEntrySession(patient, htmlForm, mode);
 
 		// In case we're not using a sessionForm, we need to check for the case
@@ -89,11 +97,27 @@ public class PatientHtmlFormEntryController extends HtmlFormEntryController {
 	protected ModelAndView onSubmit(HttpServletRequest request, HttpServletResponse response, Object commandObject, BindException errors)
 			throws Exception {
 		FormEntrySession session = (FormEntrySession) commandObject;
-		session.preparePersonForSubmit();
+		if (isEncounterEnabled) {
+			session.prepareForSubmit();
+		}
+		else {
+			session.preparePersonForSubmit();
+		}
+
 		if (session.getContext().getMode() == Mode.ENTER
 				&& (session.getSubmissionActions().getPersonsToCreate() == null || session.getSubmissionActions().getPersonsToCreate().size() == 0))
 			throw new IllegalArgumentException("This form is not going to create an Patient");
-		
+
 		return handleSubmit(request, response, session, errors);
+	}
+
+	private boolean hasEncouterTag(String xmlData) {
+		for (String tag : HtmlFormEntryConstants.ENCOUNTER_TAGS) {
+			tag = "<" + tag;
+			if (xmlData.contains(tag)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

@@ -356,7 +356,11 @@ public class PatientFieldDetailSubmissionElement implements HtmlGeneratorElement
 				patient.addIdentifier(patientIdentifier);
 			}
 
-			patientIdentifier.setIdentifier((String) identifierTypeValueWidget.getValue(session.getContext(), request));
+			String identifier = (String) identifierTypeValueWidget.getValue(session.getContext(), request);
+			if (identifier != null && !identifier.equals(patientIdentifier.getIdentifier()) && patientIdentifier.getIdentifierType() != null) {
+				validateIdentifier(patientIdentifier.getIdentifierType().getPatientIdentifierTypeId(), identifier);
+			}
+			patientIdentifier.setIdentifier(identifier);
 			patientIdentifier.setPreferred(true);
 		}
 
@@ -369,6 +373,9 @@ public class PatientFieldDetailSubmissionElement implements HtmlGeneratorElement
 
 			PatientIdentifierType pit = getIdentifierType((String) identifierTypeWidget.getValue(session.getContext(), request));
 
+			if (!pit.equals(patientIdentifier.getIdentifierType())) {
+				validateIdentifier(pit.getPatientIdentifierTypeId(), patientIdentifier.getIdentifier());
+			}
 			patientIdentifier.setIdentifierType(pit);
 			patientIdentifier.setPreferred(true);
 
@@ -393,16 +400,23 @@ public class PatientFieldDetailSubmissionElement implements HtmlGeneratorElement
 			personAddress.setPreferred(true);
 			patient.addAddress(personAddress);
 		}
-		
-		Integer identifierType = null;
-		String identifier = null;
-		if (patient.getPatientIdentifier()!= null){
-			if (patient.getPatientIdentifier().getIdentifierType() != null){
-				identifierType = patient.getPatientIdentifier().getIdentifierType().getPatientIdentifierTypeId();
+
+		if (session.getContext().getMode() == Mode.ENTER) {
+			Integer identifierType = null;
+			String identifier = null;
+			if (patient.getPatientIdentifier() != null) {
+				if (patient.getPatientIdentifier().getIdentifierType() != null) {
+					identifierType = patient.getPatientIdentifier().getIdentifierType().getPatientIdentifierTypeId();
+				}
+				identifier = patient.getPatientIdentifier().getIdentifier();
 			}
-			identifier = patient.getPatientIdentifier().getIdentifier();
+			if (identifierType != null && identifier != null) {
+				validateIdentifier(identifierType, identifier);
+			}
 		}
-		
+	}
+
+	private void validateIdentifier(Integer identifierType, String identifier) {
 		if (identifierType != null && identifier != null) {
 			try {
 				PatientIdentifier pi = new PatientIdentifier();
