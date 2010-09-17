@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.openmrs.PersonAddress;
 import org.openmrs.module.htmlformentry.FormEntryContext;
+import org.openmrs.module.htmlformentry.FormEntryContext.Mode;
 
 public class AddressWidget extends Gadget {
 
@@ -27,13 +28,28 @@ public class AddressWidget extends Gadget {
 
 	public AddressWidget() {
 		addressWidget1 = new TextFieldWidget(40);
+		addressWidget1.setTextFieldMaxLength(50);
+		
 		addressWidget2 = new TextFieldWidget(40);
+		addressWidget2.setTextFieldMaxLength(50);
+		
 		cityWidget = new TextFieldWidget(10);
+		cityWidget.setTextFieldMaxLength(50);
+		
 		stateWidget = new TextFieldWidget(10);
+		stateWidget.setTextFieldMaxLength(50);
+		
 		countryWidget = new TextFieldWidget(10);
+		countryWidget.setTextFieldMaxLength(50);
+		
 		postalCodeWidget = new TextFieldWidget(10);
+		postalCodeWidget.setTextFieldMaxLength(50);
+		
 		latitudeWidget = new TextFieldWidget(10);
+		latitudeWidget.setTextFieldMaxLength(50);
+		
 		longitudeWidget = new TextFieldWidget(10);
+		longitudeWidget.setTextFieldMaxLength(50);
 	}
 
 	public AddressWidget(PersonAddress personAddress) {
@@ -65,7 +81,13 @@ public class AddressWidget extends Gadget {
 
 	public PersonAddress getValue(FormEntryContext context, HttpServletRequest request) {
 
-		PersonAddress personAddress = new PersonAddress();
+		PersonAddress personAddress = null;
+		if(context.getMode() == Mode.ENTER){
+			personAddress = new PersonAddress();
+		}
+		else{
+			personAddress = context.getExistingPatient().getPersonAddress();
+		}
 		personAddress.setAddress1((String) addressWidget1.getValue(context, request));
 		personAddress.setAddress2((String) addressWidget2.getValue(context, request));
 		personAddress.setCityVillage((String) cityWidget.getValue(context, request));

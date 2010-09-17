@@ -74,10 +74,10 @@ public class PatientFieldDetailSubmissionElement implements HtmlGeneratorElement
 
 	public static final String FIELD_ADDRESS = "address";
 
-	private Widget givenNameWidget;
+	private TextFieldWidget givenNameWidget;
 	private ErrorWidget givenNameErrorWidget;
-	private Widget middleNameWidget;
-	private Widget familyNameWidget;
+	private TextFieldWidget middleNameWidget;
+	private TextFieldWidget familyNameWidget;
 	private ErrorWidget familyNameErrorWidget;
 	private RadioButtonsWidget genderWidget;
 	private ErrorWidget genderErrorWidget;
@@ -101,13 +101,16 @@ public class PatientFieldDetailSubmissionElement implements HtmlGeneratorElement
 		Patient existingPatient = context.getExistingPatient();
 		if (FIELD_PERSON_NAME.equalsIgnoreCase(field)) {
 			givenNameWidget = new TextFieldWidget();
+			givenNameWidget.setTextFieldMaxLength(50);
 			givenNameErrorWidget = new ErrorWidget();
 			createWidgets(context, givenNameWidget, givenNameErrorWidget, existingPatient != null ? existingPatient.getGivenName() : null);
 
 			middleNameWidget = new TextFieldWidget();
+			middleNameWidget.setTextFieldMaxLength(50);
 			createWidgets(context, middleNameWidget, null, existingPatient != null ? existingPatient.getMiddleName() : null);
 
 			familyNameWidget = new TextFieldWidget();
+			familyNameWidget.setTextFieldMaxLength(50);
 			familyNameErrorWidget = new ErrorWidget();
 			createWidgets(context, familyNameWidget, familyNameErrorWidget, existingPatient != null ? existingPatient.getFamilyName() : null);
 		}
