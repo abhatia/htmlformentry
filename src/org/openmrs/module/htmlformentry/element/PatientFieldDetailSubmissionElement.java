@@ -66,6 +66,16 @@ public class PatientFieldDetailSubmissionElement implements HtmlGeneratorElement
 
 	public static final String FIELD_GIVEN_NAME = "givenName";
 
+	public static final String FIELD_FAMILY_NAME_PREFIX = "familyNamePrefix";
+
+	public static final String FIELD_FAMILY_NAME_2 = "familyName2";
+
+	public static final String FIELD_FAMILY_NAME_SUFFIX = "familyNameSuffix";
+
+	public static final String FIELD_PREFIX = "prefix";
+
+	public static final String FIELD_DEGREE = "degree";
+
 	public static final String FIELD_IDENTIFIER = "identifier";
 
 	public static final String FIELD_IDENTIFIER_TYPE = "identifierType";
@@ -79,6 +89,11 @@ public class PatientFieldDetailSubmissionElement implements HtmlGeneratorElement
 	private TextFieldWidget middleNameWidget;
 	private TextFieldWidget familyNameWidget;
 	private ErrorWidget familyNameErrorWidget;
+	private TextFieldWidget familyNamePrefixWidget;
+	private TextFieldWidget familyName2Widget;
+	private TextFieldWidget familyNameSuffixWidget;
+	private TextFieldWidget prefixWidget;
+	private TextFieldWidget degreeWidget;
 	private RadioButtonsWidget genderWidget;
 	private ErrorWidget genderErrorWidget;
 	private Widget ageWidget;
@@ -127,6 +142,31 @@ public class PatientFieldDetailSubmissionElement implements HtmlGeneratorElement
 			familyNameWidget = new TextFieldWidget();
 			familyNameErrorWidget = new ErrorWidget();
 			createWidgets(context, familyNameWidget, familyNameErrorWidget, existingPatient != null ? existingPatient.getFamilyName() : null);
+		}
+		else if (FIELD_FAMILY_NAME_PREFIX.equalsIgnoreCase(field)) {
+			familyNamePrefixWidget = new TextFieldWidget();
+			createWidgets(context, familyNamePrefixWidget, null, existingPatient != null && existingPatient.getPersonName() != null ? existingPatient
+					.getPersonName().getFamilyNamePrefix() : null);
+		}
+		else if (FIELD_FAMILY_NAME_SUFFIX.equalsIgnoreCase(field)) {
+			familyNameSuffixWidget = new TextFieldWidget();
+			createWidgets(context, familyNameSuffixWidget, null, existingPatient != null && existingPatient.getPersonName() != null ? existingPatient
+					.getPersonName().getFamilyNameSuffix() : null);
+		}
+		else if (FIELD_FAMILY_NAME_2.equalsIgnoreCase(field)) {
+			familyName2Widget = new TextFieldWidget();
+			createWidgets(context, familyName2Widget, null, existingPatient != null && existingPatient.getPersonName() != null ? existingPatient
+					.getPersonName().getFamilyName2() : null);
+		}
+		else if (FIELD_PREFIX.equalsIgnoreCase(field)) {
+			prefixWidget = new TextFieldWidget();
+			createWidgets(context, prefixWidget, null, existingPatient != null && existingPatient.getPersonName() != null ? existingPatient
+					.getPersonName().getPrefix() : null);
+		}
+		else if (FIELD_DEGREE.equalsIgnoreCase(field)) {
+			degreeWidget = new TextFieldWidget();
+			createWidgets(context, degreeWidget, null, existingPatient != null && existingPatient.getPersonName() != null ? existingPatient
+					.getPersonName().getDegree() : null);
 		}
 		else if (FIELD_GENDER.equalsIgnoreCase(field)) {
 			genderWidget = new RadioButtonsWidget();
@@ -191,7 +231,6 @@ public class PatientFieldDetailSubmissionElement implements HtmlGeneratorElement
 			createWidgets(context, identifierLocationWidget, identifierLocationErrorWidget, existingPatient != null
 					&& existingPatient.getPatientIdentifier() != null ? existingPatient.getPatientIdentifier().getLocation() : null);
 		}
-
 		else if (FIELD_ADDRESS.equalsIgnoreCase(field)) {
 			addressWidget = new AddressWidget();
 			createWidgets(context, addressWidget, null, existingPatient != null ? existingPatient.getPersonAddress() : null);
@@ -236,6 +275,26 @@ public class PatientFieldDetailSubmissionElement implements HtmlGeneratorElement
 			sb.append(familyNameWidget.generateHtml(context));
 			if (context.getMode() != Mode.VIEW)
 				sb.append(familyNameErrorWidget.generateHtml(context));
+		}
+
+		if (familyNamePrefixWidget != null) {
+			sb.append(familyNamePrefixWidget.generateHtml(context));
+		}
+
+		if (familyNameSuffixWidget != null) {
+			sb.append(familyNameSuffixWidget.generateHtml(context));
+		}
+
+		if (familyName2Widget != null) {
+			sb.append(familyName2Widget.generateHtml(context));
+		}
+
+		if (prefixWidget != null) {
+			sb.append(prefixWidget.generateHtml(context));
+		}
+
+		if (degreeWidget != null) {
+			sb.append(degreeWidget.generateHtml(context));
 		}
 
 		if (genderWidget != null) {
@@ -329,6 +388,66 @@ public class PatientFieldDetailSubmissionElement implements HtmlGeneratorElement
 				patient.addName(personName);
 			}
 			personName.setFamilyName(value);
+			personName.setPreferred(true);
+		}
+
+		if (familyNamePrefixWidget != null) {
+			String value = (String) familyNamePrefixWidget.getValue(session.getContext(), request);
+			PersonName personName = patient.getPersonName();
+
+			if (personName == null) {
+				personName = new PersonName();
+				patient.addName(personName);
+			}
+			personName.setFamilyNamePrefix(value);
+			personName.setPreferred(true);
+		}
+
+		if (familyNameSuffixWidget != null) {
+			String value = (String) familyNameSuffixWidget.getValue(session.getContext(), request);
+			PersonName personName = patient.getPersonName();
+
+			if (personName == null) {
+				personName = new PersonName();
+				patient.addName(personName);
+			}
+			personName.setFamilyNameSuffix(value);
+			personName.setPreferred(true);
+		}
+
+		if (familyName2Widget != null) {
+			String value = (String) familyName2Widget.getValue(session.getContext(), request);
+			PersonName personName = patient.getPersonName();
+
+			if (personName == null) {
+				personName = new PersonName();
+				patient.addName(personName);
+			}
+			personName.setFamilyName2(value);
+			personName.setPreferred(true);
+		}
+
+		if (prefixWidget != null) {
+			String value = (String) prefixWidget.getValue(session.getContext(), request);
+			PersonName personName = patient.getPersonName();
+
+			if (personName == null) {
+				personName = new PersonName();
+				patient.addName(personName);
+			}
+			personName.setPrefix(value);
+			personName.setPreferred(true);
+		}
+
+		if (degreeWidget != null) {
+			String value = (String) degreeWidget.getValue(session.getContext(), request);
+			PersonName personName = patient.getPersonName();
+
+			if (personName == null) {
+				personName = new PersonName();
+				patient.addName(personName);
+			}
+			personName.setDegree(value);
 			personName.setPreferred(true);
 		}
 
